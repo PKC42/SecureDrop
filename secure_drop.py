@@ -21,7 +21,7 @@ def run():
         if selection == 'y':
             register_new_user()
         else:
-            print("Exiting Secure Drop")
+            print("Exiting Secure Drop.")
     else:
         # call login function from login.py
         pass
