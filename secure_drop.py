@@ -1,6 +1,7 @@
 from registration import register_new_user
 from login import login
 from utilities import user_file_scan
+from operation import operation
 
 def run():
     
@@ -35,6 +36,23 @@ def run():
         else:
             print("Welcome to Secure Drop.")
             # functions for list commands go here
+            while True:
+                print("secure_drop> ")
+                user_selection = input()
+                status = operation(user_selection)
+
+                # If there is an error witht he input, indicate it as such
+                if status == "input_error":
+                    print("Input Error. Please choose a valid operation. Type \"help\" to see options")
+
+                # If the return value of operation is 0, we can exit the program.
+                if status == "exit":
+                    break
+
+
+                
+            
+
 
     print("Exiting Secure Drop.")
     return

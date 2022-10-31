@@ -4,6 +4,7 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
 from Crypto.Random import get_random_bytes
 from pathlib import Path
+import os
 
 # Check if there is a lowercase letter in the string
 def check_lower(st):
@@ -47,3 +48,4 @@ def user_file_scan():
         return True
     else:
         return False
+

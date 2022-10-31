@@ -4,13 +4,9 @@ import json
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
 from Crypto.Random import get_random_bytes
-'''
-import hashlib
 import os
-'''
 
-
-# This folder will contain the user registration processes
+# This file will contain the user registration processes
 
 def register_new_user():
     print("Enter Full Name:")
@@ -54,17 +50,7 @@ def register_new_user():
     print("Passwords Match.")
     print("User Registered.")
 
-    # hash 
-    '''
-    salt = os.urandom(32)
-    hashed_name = hash_string(name, salt)
-    hashed_email = hash_string(email, salt)
-    hashed_pass = hash_string(password, salt)
     
-    #storage = salt + hashed_pass
-    #s = storage.decode()
-    '''
-
     # generate salt
     salt = get_random_bytes(16)
     salt = salt.decode("ISO-8859-1")
@@ -86,32 +72,10 @@ def register_new_user():
         "Key" : hashed_pass,
         "Salt": salt
     }
-    '''
-    #Writes user data into text file 
-    with open("users.txt", "w") as outfile:
-        outfile.write("Name: ")
-
-    with open("users.txt", "ab") as outfile:
-        outfile.write(hashed_name)
-    
-    with open("users.txt", "a") as outfile:
-        outfile.write("\nEmail: ")
-
-    with open("users.txt", "ab") as outfile:
-        outfile.write(hashed_email)
-
-    with open("users.txt", "a") as outfile:
-        outfile.write("\nPassword: ")
-
-    with open("users.txt", "ab") as outfile:
-        outfile.write(hashed_pass)
-
-    #Stores salt into key.txt file
-    with open("key.txt", "wb") as outfile:
-        outfile.write(salt)
-    '''
 
     # write into json file
     file = open('users.json', 'w')
     json.dump(data, file)
+    os.chmod("users.json", 0o400)
     file.close()
+    print("Contact Added.")
