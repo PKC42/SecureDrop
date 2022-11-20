@@ -48,12 +48,7 @@ def run():
                 # If the return value of operation is 0, we can exit the program.
                 if status == "exit":
                     break
-
-
-                
             
-
-
     print("Exiting Secure Drop.")
     return
     

@@ -78,4 +78,4 @@ def register_new_user():
     json.dump(data, file)
     os.chmod("users.json", 0o400)
     file.close()
-    print("Contact Added.")
+    print("User Added.")

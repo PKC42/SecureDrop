@@ -1,6 +1,7 @@
 import json
-from utilities import hash_string
+from utilities import hash_string, compare_timestamp
 from getpass import getpass
+
 
 def login():
     
@@ -34,6 +35,11 @@ def login():
             print("Failed to login 3 times. Exiting Program.")
             return 1
 
+     # Check if there has been modifications
+    if compare_timestamp("time_log.txt", "contacts.json") == False:
+        print("!!!WARNING!!!:Contact has been modified outside of the session!")
+    else:
+        print("It works....")
 
     return 0
             

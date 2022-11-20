@@ -5,6 +5,8 @@ from Crypto.Hash import SHA512
 from Crypto.Random import get_random_bytes
 from pathlib import Path
 import os
+import time
+import datetime
 
 # Check if there is a lowercase letter in the string
 def check_lower(st):
@@ -48,4 +50,20 @@ def user_file_scan():
         return True
     else:
         return False
+
+def get_timestamp(file_name):
+    timestamp = os.path.getmtime(file_name)
+    datestamp = datetime.datetime.fromtimestamp(timestamp)
+    #print('Date/Time:', datestamp)
+    
+    return datestamp
+
+def compare_timestamp(contact_file, time_file):
+    contact_stamp = get_timestamp(contact_file)
+    time_stamp = get_timestamp(time_file)
+
+    if contact_stamp != time_stamp:
+        return False
+    
+    return True
 

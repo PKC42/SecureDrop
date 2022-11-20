@@ -1,11 +1,13 @@
 import re
-from utilities import check_lower, check_upper, check_number, check_symbol, hash_string
+from utilities import check_lower, check_upper, check_number, check_symbol, get_timestamp, hash_string
 import json
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
 from Crypto.Random import get_random_bytes
 from pathlib import Path
 import os, sys, stat
+import datetime, time
+
 
 # contains operations list once the user logs in
 def operation(menu_option):
@@ -73,19 +75,30 @@ def add_contact():
     if file.is_file():
         # if file exists, load
         fp = open('contacts.json', 'r')
+        fp2 = open('time_log.txt' , 'w')
+        # change permissions to read and write
+        os.chmod('contacts.json', 0o600)
         data = json.load(fp)
         fp.close()
         data[contact_name] = {
             "Email" : hashed_contact_email,
             "Salt": salt
         }
+        
         fp = open('contacts.json', 'w')
+        fp2.write("Stamp")
         json.dump(data, fp)
         fp.close()
+        fp2.close()
         print("Contact Added")
+
+        # change to read only
+        os.chmod('contacts.json', 0o400)
+
     else:
         # init json file
         fp = open('contacts.json', 'w')
+        fp2 = open('time_log.txt' , 'w')
         os.chmod('contacts.json', 0o600)
         contact_data = {
             contact_name: {
@@ -94,7 +107,9 @@ def add_contact():
                 }
         }
         json.dump(contact_data, fp)
+        fp2.write("Start")
         fp.close()
+        fp2.close()
         
         print("Contact Added")
 
