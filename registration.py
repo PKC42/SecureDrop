@@ -7,7 +7,6 @@ from Crypto.Random import get_random_bytes
 import os
 
 # This file will contain the user registration processes
-
 def register_new_user():
     print("Enter Full Name:")
 

@@ -73,6 +73,16 @@ def add_contact():
     hashed_contact_email = hash_string(contact_email, salt)
 
     del contact_email
+      
+    print("Enter IP address of the contact (IPV4): ")
+    while True:
+        ip_address = input()
+        if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ip_address):
+            break
+        else:
+            print("Enter an IPV4 ip address in the correct format.")
+
+
   
     file = Path('contacts.json')
     if file.is_file():
@@ -85,7 +95,8 @@ def add_contact():
         fp.close()
         data[contact_name] = {
             "Email" : hashed_contact_email,
-            "Salt": salt
+            "Salt": salt,
+            "IP": ip_address
         }
         
         fp = open('contacts.json', 'w')
@@ -106,7 +117,8 @@ def add_contact():
         contact_data = {
             contact_name: {
                 "Email" : hashed_contact_email,
-                "Salt": salt
+                "Salt": salt,
+                "IP" : ip_address
                 }
         }
         json.dump(contact_data, fp)
@@ -123,6 +135,8 @@ def list():
     # contact should only appear if they exist in contacts.json, they other contact has added you and if the other contact is also online
 
     pass
+    
+
     
 def send():
     # select contact to send to (they must be online)
