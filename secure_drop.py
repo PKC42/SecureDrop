@@ -41,7 +41,7 @@ def run():
                 user_selection = input()
                 status = operation(user_selection)
 
-                # If there is an error witht he input, indicate it as such
+                # If there is an error with he input, indicate it as such
                 if status == "input_error":
                     print("Input Error. Please choose a valid operation. Type \"help\" to see options")
 

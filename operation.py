@@ -25,6 +25,7 @@ def operation(menu_option):
     # list contacts
     elif(menu_option == "list"):
         #Call list function to print out list of contacts
+        list()
         return "done"
 
     # send files
@@ -38,7 +39,8 @@ def operation(menu_option):
 
     # return "input_error" indicates an error with input
     return "input_error"
-
+    
+# help menu
 def help():
     print("\"add\"  -> Add a new contact")
     print("\"list\" -> List all online contacts")
@@ -46,6 +48,7 @@ def help():
     print("\"exit\"  -> Exit SecureDrop")
     return
 
+# process for adding contacts
 def add_contact():
     print("Enter Full Name: ")
 
@@ -116,6 +119,17 @@ def add_contact():
     
     
 
+def list():
+    # contact should only appear if they exist in contacts.json, they other contact has added you and if the other contact is also online
+
+    pass
+    
+def send():
+    # select contact to send to (they must be online)
+
+    # send certificate for validation
+
+    # receive certificate 
 
     
-
+    pass
