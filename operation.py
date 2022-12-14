@@ -5,8 +5,10 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
 from Crypto.Random import get_random_bytes
 from pathlib import Path
+from os.path import exists
 import os, sys, stat
 import datetime, time
+from communications import send_file, receive_file
 
 
 # contains operations list once the user logs in
@@ -30,6 +32,7 @@ def operation(menu_option):
 
     # send files
     elif(menu_option == "send"):
+        send()
         return "done"
     
     # exit menu
@@ -132,18 +135,42 @@ def add_contact():
     
 
 def list():
-    # contact should only appear if they exist in contacts.json, they other contact has added you and if the other contact is also online
 
-    pass
+    file = Path('contacts.json')
+    if file.is_file():
+        fp = open('contacts.json', "r")
+        data = json.load(fp)
+        print("\nContacts: ")
+        for contacts in data:
+            print(contacts)
+    else:
+        print("No Contacts!")
+    
+    print("\n")
     
 
-    
+
 def send():
-    # select contact to send to (they must be online)
 
-    # send certificate for validation
+    print("Who do you want to send the file to?")
+    contact = input()
+    file = Path('contacts.json')
+    # Error Check 
+    
 
-    # receive certificate 
+    print("Enter the file that you want to send (include path if it is not in the program folder)")
+    file_name = input()
+    file = Path(file_name)
+    while file.is_file() == False:
+        print("Unable to get file. Try again.")
+        file_name = input()
+        file = Path(file_name)
+    
+    print(f"{file_name} is a valid file!")
+    data = open(file_name, "rb")
+
+    send_file("172.17.0.2", data)
+
 
     
-    pass
+    

@@ -1,8 +1,8 @@
 Secure Drop
 Team 9
 Sidarong Men, Thomas Breau, Pratush Kc
-10/31/2022
-Milestones 1-3 Submission 
+12/13/2022
+Milestones 1-5 Submission 
 
 Milestone 1:
     - The program scans for a user.json file.
@@ -43,17 +43,18 @@ Milestone 3:
         - The user is added with the name being the key and the other sensitive information being hashed and added the value in the form of another dictionary.
         - The file is saved. 
 
+    Milestone 4:
+        - not completed
+        - only displays contacts (not offline or addded back)
+    
+    Milestone 5:
+        - not completed
+        - sending and receiving functions can be found in communications.py
+        - data is read from a file as bytes for tranmission 
+        - certificates were generated using easyrsa to use SSL
 
-    Potential Problems:
-        - When registering the user, there is no protections against a bogus file
-        - Files can still be deleted in disruption attacks
-        - If the owner's account is compromised, the attacker may potentially conduct an injection attack to destroy data.
-        - We still do not have a way to detect if a file has been modified by an attacker. 
 
-    To do list:
-        - Make sure that json files can not be edited or deleted (may need to revoke all permissions before ending the program).
-        - Make sure json files can not be easily deleted.
-        - Find a way to detect changed made by an attacker
+   
 
     Files:
         secure_drop.py (all major functions are called from here)
@@ -64,12 +65,9 @@ Milestone 3:
         utilities.py (contains extra helpful user defined functions)
         users.json (contains user information)
         contacts.json (contains contact information)
+        time_log.txt (for checking if there are any changes)
+        communications.py (for socket programming (sending and receiving files))
 
-    For testing: 
-        Delete users.json and contacts.json before trying out registration contact addition
-        Current login creditials with the submitted data are:
-        Name: John Smith 
-        Email: john_smith@student.uml.edu
-        Password: #Ireallylikeapples1
+
 
         
