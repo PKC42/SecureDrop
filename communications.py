@@ -62,10 +62,4 @@ def receive_file():
                 print("Unable to get the peer's certificate")
 
 
-# For testing purposes
-'''
-if __name__ == "__main__":
-    pass
-    send_file("172.17.0.2")
-    #listen()
-'''
+
