@@ -112,7 +112,7 @@ def listen():
             ip_address = addrs[netifaces.AF_INET][0]['addr']
             break
 
-    port = 12345
+    port = 10000
 
     listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
