@@ -51,6 +51,7 @@ def user_file_scan():
     else:
         return False
 
+# Return file time stmap
 def get_timestamp(file_name):
     timestamp = os.path.getmtime(file_name)
     datestamp = datetime.datetime.fromtimestamp(timestamp)
@@ -58,6 +59,7 @@ def get_timestamp(file_name):
     
     return datestamp
 
+# Compare time stamps
 def compare_timestamp(contact_file, time_file):
     contact_stamp = get_timestamp(contact_file)
     time_stamp = get_timestamp(time_file)
@@ -67,3 +69,11 @@ def compare_timestamp(contact_file, time_file):
     
     return True
 
+
+
+def contact_file_scan():
+    file = Path('contacts.json')
+    if file.is_file():
+        return True
+    else:
+        return False

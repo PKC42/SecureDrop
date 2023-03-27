@@ -18,7 +18,8 @@ def login():
 
         # Convert email into hashed version
         print("Enter Email Address:")
-        email = hash_string(input(), data['Salt'])
+        email = input()
+        # hash_string(input(), data['Salt'])
 
         # Convert email into hashed version
         print("Enter Password:")

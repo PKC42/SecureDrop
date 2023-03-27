@@ -75,7 +75,7 @@ def add_contact():
 
     hashed_contact_email = hash_string(contact_email, salt)
 
-    del contact_email
+    # del contact_email
       
     print("Enter IP address of the contact (IPV4): ")
     while True:
@@ -84,8 +84,6 @@ def add_contact():
             break
         else:
             print("Enter an IPV4 ip address in the correct format.")
-
-
   
     file = Path('contacts.json')
     if file.is_file():
@@ -97,7 +95,7 @@ def add_contact():
         data = json.load(fp)
         fp.close()
         data[contact_name] = {
-            "Email" : hashed_contact_email,
+            "Email" : contact_email,
             "Salt": salt,
             "IP": ip_address
         }
@@ -119,7 +117,7 @@ def add_contact():
         os.chmod('contacts.json', 0o600)
         contact_data = {
             contact_name: {
-                "Email" : hashed_contact_email,
+                "Email" : contact_email,
                 "Salt": salt,
                 "IP" : ip_address
                 }
@@ -131,8 +129,6 @@ def add_contact():
         
         print("Contact Added")
 
-    
-    
 
 def list():
 
@@ -145,18 +141,32 @@ def list():
             print(contacts)
     else:
         print("No Contacts!")
-    
+    fp.close()
+
     print("\n")
     
 
 
 def send():
 
-    print("Who do you want to send the file to?")
-    contact = input()
-    file = Path('contacts.json')
-    # Error Check 
-    
+    status = False
+
+    while status == False:
+        print("Who do you want to send the file to?")
+        contact = input()
+        file = Path('contacts.json')
+        # Error Check 
+        if file.is_file():
+            fp = open('contacts.json', "r")
+            data = json.load(fp)
+            for contacts in data:
+                if contact == contacts:
+                    status = True
+            if status == False:
+                print(contact, " is not in your contacts list! Please enter a valid contact!")
+        else:
+            print("No Contacts! Returning to main menu.")
+            return
 
     print("Enter the file that you want to send (include path if it is not in the program folder)")
     file_name = input()

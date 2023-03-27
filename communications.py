@@ -1,5 +1,11 @@
 import socket
 import ssl
+from pathlib import Path
+import json
+import sys
+import time
+import platform
+import netifaces
 
 # takes data and ip address to send to the other socket
 def send_file(ip_address, data):
@@ -62,10 +68,57 @@ def receive_file():
                 print("Unable to get the peer's certificate")
 
 
-# For testing purposes
-'''
-if __name__ == "__main__":
-    pass
-    send_file("172.17.0.2")
-    #listen()
-'''
+def broadcast():
+    broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    ip_addresses = []
+
+    while True:
+
+        file = Path('contacts.json')
+        if file.is_file():
+            fp = open('contacts.json', "r")
+            data = json.load(fp)
+        for contacts in data:
+            ip_addresses.append(data[contacts]["IP"])
+
+        file = Path('users.json')
+        if file.is_file():
+            fp = open('users.json', "r")
+            user_data = json.load(fp)
+        
+        message = user_data["Email"]
+
+        # send upd broadcast of the users email to the ip addresses
+        message = message.encode('utf-8')
+
+        for ip in ip_addresses:
+            address = (ip, 10000)
+            broadcast_socket.sendto(message, address)
+        time.sleep(5)
+          
+     
+
+
+def listen():
+    interfaces = netifaces.interfaces()
+
+    
+    for interface in interfaces:
+        if interface.startswith("lo"):
+            continue
+        addrs = netifaces.ifaddresses(interface)
+        if netifaces.AF_INET in addrs:
+            ip_address = addrs[netifaces.AF_INET][0]['addr']
+            break
+
+    port = 10000
+
+    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    listening_socket.bind((ip_address, port))
+
+    while True:
+        data, address = listening_socket.recvfrom(1024)  
+        print("Received data from {}: {}".format(address, data.decode('utf-8')))

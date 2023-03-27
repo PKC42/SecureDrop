@@ -55,11 +55,11 @@ def register_new_user():
     salt = salt.decode("ISO-8859-1")
 
     # hash the email and password
-    hashed_email = hash_string(email, salt)
+    # hashed_email = hash_string(email, salt)
     hashed_pass = hash_string(password, salt)
 
     # delete all instances of plaintext versions of confidential info
-    del email
+    # del email
     del password
     del password_1
     del password_2
@@ -67,7 +67,7 @@ def register_new_user():
     # insert into dictionary 
     data = {
         "Name:": name,
-        "Email": hashed_email,
+        "Email": email,
         "Key" : hashed_pass,
         "Salt": salt
     }

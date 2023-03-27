@@ -1,7 +1,11 @@
 from registration import register_new_user
 from login import login
 from utilities import user_file_scan
+from utilities import *
 from operation import operation
+from threading import Thread
+from communications import *
+
 
 def run():
     
@@ -34,6 +38,14 @@ def run():
             print("Exiting Secure Drop.")
             return
         else:
+            # start broadcasting that the client is now online
+            if contact_file_scan() == True:
+                t1 = Thread(target = broadcast)
+                t1.start() 
+
+            t2 = Thread(target = listen)
+            t2.start()
+
             print("Welcome to Secure Drop.")
             # functions for list commands go here
             while True:
