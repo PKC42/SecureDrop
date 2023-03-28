@@ -94,10 +94,14 @@ def add_contact():
         os.chmod('contacts.json', 0o600)
         data = json.load(fp)
         fp.close()
+
+        status = False
+
         data[contact_name] = {
             "Email" : contact_email,
             "Salt": salt,
-            "IP": ip_address
+            "IP": ip_address,
+            "Status": status
         }
         
         fp = open('contacts.json', 'w')

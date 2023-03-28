@@ -68,13 +68,12 @@ def receive_file():
                 print("Unable to get the peer's certificate")
 
 
-def broadcast():
+def broadcast(end_flag):
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     ip_addresses = []
 
-    while True:
-
+    while not end_flag.is_set():
         file = Path('contacts.json')
         if file.is_file():
             fp = open('contacts.json', "r")
@@ -93,14 +92,16 @@ def broadcast():
         message = message.encode('utf-8')
 
         for ip in ip_addresses:
-            address = (ip, 10000)
+            address = (ip, 20004)
             broadcast_socket.sendto(message, address)
         time.sleep(5)
-          
-     
+    
+    print("Closing Broadcast socket")
+    broadcast_socket.close()
+    fp.close()
 
 
-def listen():
+def listen(end_flag):
     interfaces = netifaces.interfaces()
 
     
@@ -112,13 +113,22 @@ def listen():
             ip_address = addrs[netifaces.AF_INET][0]['addr']
             break
 
-    port = 10000
+    port = 20004
 
     listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     listening_socket.bind((ip_address, port))
 
-    while True:
-        data, address = listening_socket.recvfrom(1024)  
-        print("Received data from {}: {}".format(address, data.decode('utf-8')))
+    while not end_flag.is_set():
+        try:
+            listening_socket.settimeout(1.0)
+            data, address = listening_socket.recvfrom(1024)  
+            print("Received data from {}: {}".format(address, data.decode('utf-8')))
+        except socket.timeout:
+            pass
+
+    print("Closing Listening Socket")
+    listening_socket.close()
+
+

@@ -5,10 +5,14 @@ from utilities import *
 from operation import operation
 from threading import Thread
 from communications import *
+import threading
 
 
 def run():
-    
+
+    # flag for ending threads
+    end_flag = threading.Event()
+
     # If user file does not exist, register to create a user
     if user_file_scan() == False:
         print("No users are registered with this client.")
@@ -40,10 +44,10 @@ def run():
         else:
             # start broadcasting that the client is now online
             if contact_file_scan() == True:
-                t1 = Thread(target = broadcast)
+                t1 = Thread(target = broadcast, args = (end_flag, ))
                 t1.start() 
 
-            t2 = Thread(target = listen)
+            t2 = Thread(target = listen, args = (end_flag, ))
             t2.start()
 
             print("Welcome to Secure Drop.")
@@ -62,6 +66,8 @@ def run():
                     break
             
     print("Exiting Secure Drop.")
+    end_flag.set()
+
     return
     
 if __name__ == "__main__":
