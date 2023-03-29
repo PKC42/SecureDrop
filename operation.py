@@ -12,7 +12,7 @@ from communications import send_file, receive_file
 
 
 # contains operations list once the user logs in
-def operation(menu_option):
+def operation(menu_option, online_user_emails):
 
     # display help menu
     if(menu_option == "help"):
@@ -27,7 +27,7 @@ def operation(menu_option):
     # list contacts
     elif(menu_option == "list"):
         #Call list function to print out list of contacts
-        list()
+        list(online_user_emails)
         return "done"
 
     # send files
@@ -76,6 +76,8 @@ def add_contact():
     hashed_contact_email = hash_string(contact_email, salt)
 
     # del contact_email
+
+    status = "Offline"
       
     print("Enter IP address of the contact (IPV4): ")
     while True:
@@ -94,8 +96,6 @@ def add_contact():
         os.chmod('contacts.json', 0o600)
         data = json.load(fp)
         fp.close()
-
-        status = False
 
         data[contact_name] = {
             "Email" : contact_email,
@@ -123,7 +123,8 @@ def add_contact():
             contact_name: {
                 "Email" : contact_email,
                 "Salt": salt,
-                "IP" : ip_address
+                "IP" : ip_address,
+                "Status" : status
                 }
         }
         json.dump(contact_data, fp)
@@ -134,18 +135,18 @@ def add_contact():
         print("Contact Added")
 
 
-def list():
+def list(online_user_emails):
 
     file = Path('contacts.json')
     if file.is_file():
-        fp = open('contacts.json', "r")
-        data = json.load(fp)
-        print("\nContacts: ")
-        for contacts in data:
-            print(contacts)
+        pass
     else:
         print("No Contacts!")
-    fp.close()
+
+    print("Online Contacts: ")
+    for item in online_user_emails:
+        print(item)
+
 
     print("\n")
     

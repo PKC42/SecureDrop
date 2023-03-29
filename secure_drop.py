@@ -42,12 +42,15 @@ def run():
             print("Exiting Secure Drop.")
             return
         else:
+            # pass a list which will be updates in thread 2
+            online_user_emails = []
+
             # start broadcasting that the client is now online
             if contact_file_scan() == True:
                 t1 = Thread(target = broadcast, args = (end_flag, ))
                 t1.start() 
 
-            t2 = Thread(target = listen, args = (end_flag, ))
+            t2 = Thread(target = listen, args = (end_flag, online_user_emails))
             t2.start()
 
             print("Welcome to Secure Drop.")
@@ -55,7 +58,7 @@ def run():
             while True:
                 print("secure_drop> ")
                 user_selection = input()
-                status = operation(user_selection)
+                status = operation(user_selection, online_user_emails)
 
                 # If there is an error with he input, indicate it as such
                 if status == "input_error":

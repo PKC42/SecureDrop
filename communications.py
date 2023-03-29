@@ -6,6 +6,7 @@ import sys
 import time
 import platform
 import netifaces
+import time
 
 # takes data and ip address to send to the other socket
 def send_file(ip_address, data):
@@ -69,6 +70,7 @@ def receive_file():
 
 
 def broadcast(end_flag):
+
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     ip_addresses = []
@@ -86,7 +88,7 @@ def broadcast(end_flag):
             fp = open('users.json', "r")
             user_data = json.load(fp)
         
-        message = user_data["Email"]
+        message = "Name: " + user_data["Name:"] + " Email: " + user_data["Email"]
 
         # send upd broadcast of the users email to the ip addresses
         message = message.encode('utf-8')
@@ -101,10 +103,10 @@ def broadcast(end_flag):
     fp.close()
 
 
-def listen(end_flag):
+def listen(end_flag, online_user_emails):
+
     interfaces = netifaces.interfaces()
 
-    
     for interface in interfaces:
         if interface.startswith("lo"):
             continue
@@ -116,17 +118,41 @@ def listen(end_flag):
     port = 20004
 
     listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     listening_socket.bind((ip_address, port))
 
-    while not end_flag.is_set():
+    start_time = time.time()
+    time_reset = 60
+
+    while not end_flag.is_set(): 
+        
+        elapsed_time = time.time() - start_time
+
+        print(elapsed_time)
+
+        if elapsed_time >= time_reset:
+            start_time = time.time()
+            elapsed_time = 0
+            online_user_emails = []
+
+
         try:
             listening_socket.settimeout(1.0)
             data, address = listening_socket.recvfrom(1024)  
-            print("Received data from {}: {}".format(address, data.decode('utf-8')))
+            # print("Received data from {}: {}".format(address, data.decode('utf-8')))
+            
+            user_email = data.decode('utf-8')
+            
+            online_user_emails.append(user_email)
+            online_user_emails = list(set(online_user_emails))
+
+            for item in online_user_emails:
+                print(item)
+
+
         except socket.timeout:
             pass
+        
 
     print("Closing Listening Socket")
     listening_socket.close()
