@@ -6,9 +6,13 @@ from operation import operation
 from threading import Thread
 from communications import *
 import threading
-
+import subprocess
 
 def run():
+
+    if cert_scan() == False:
+        openssl_cmd = "openssl req -new -x509 -days 365 -nodes -out cert.pem -keyout cert.pem"
+        subprocess.run(openssl_cmd, shell=True, check=True)
 
     # flag for ending threads
     end_flag = threading.Event()
@@ -50,15 +54,18 @@ def run():
                 t1 = Thread(target = broadcast, args = (end_flag, ))
                 t1.start() 
 
-            t2 = Thread(target = listen, args = (end_flag, online_user_emails))
+            t2 = Thread(target = listen, args = (end_flag, ))
             t2.start()
+
+            t3 = Thread(target = receive_file, args = (end_flag, ))
+            t3.start()
 
             print("Welcome to Secure Drop.")
             # functions for list commands go here
             while True:
                 print("secure_drop> ")
                 user_selection = input()
-                status = operation(user_selection, online_user_emails)
+                status = operation(user_selection)
 
                 # If there is an error with he input, indicate it as such
                 if status == "input_error":
@@ -70,6 +77,10 @@ def run():
             
     print("Exiting Secure Drop.")
     end_flag.set()
+
+    t1.join()
+    t2.join()
+    t3.join()
 
     return
     

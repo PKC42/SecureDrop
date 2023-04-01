@@ -1,5 +1,6 @@
 import re
 from utilities import check_lower, check_upper, check_number, check_symbol, get_timestamp, hash_string
+from utilities import online_user_emails
 import json
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
@@ -12,7 +13,7 @@ from communications import send_file, receive_file
 
 
 # contains operations list once the user logs in
-def operation(menu_option, online_user_emails):
+def operation(menu_option):
 
     # display help menu
     if(menu_option == "help"):
@@ -27,7 +28,7 @@ def operation(menu_option, online_user_emails):
     # list contacts
     elif(menu_option == "list"):
         #Call list function to print out list of contacts
-        list(online_user_emails)
+        list()
         return "done"
 
     # send files
@@ -135,7 +136,7 @@ def add_contact():
         print("Contact Added")
 
 
-def list(online_user_emails):
+def list():
 
     file = Path('contacts.json')
     if file.is_file():
@@ -160,7 +161,7 @@ def send():
         print("Who do you want to send the file to?")
         contact = input()
         file = Path('contacts.json')
-        # Error Check 
+
         if file.is_file():
             fp = open('contacts.json', "r")
             data = json.load(fp)
@@ -182,9 +183,11 @@ def send():
         file = Path(file_name)
     
     print(f"{file_name} is a valid file!")
-    data = open(file_name, "rb")
 
-    send_file("172.17.0.2", data)
+    ip_address = data[contact]["IP"]
+
+    print("This is the ip of your contact:", ip_address)
+    # send_file(ip_address , file_name)
 
 
     

@@ -7,67 +7,71 @@ import time
 import platform
 import netifaces
 import time
+from utilities import online_user_emails
+import threading
 
-# takes data and ip address to send to the other socket
-def send_file(ip_address, data):
 
-    print("Sending File")
-    PORT = 9000
 
-    # create a context
-    context = ssl.SSLContext()
-    context.verify_mode = ssl.CERT_REQUIRED
+online_user_lock = threading.Lock()
 
-    # load certificate authority to verify the server's certificate
-    context.load_verify_locations("ca.crt")
+def listen(end_flag):
 
-    # load the client certificate
-    context.load_cert_chain(certfile = "user.crt", keyfile = "user.key")
+    global online_user_emails
 
-    # create a socket for the client 
-    client_socket = socket.socket()
+    interfaces = netifaces.interfaces()
 
-    # wrap the client socket
-    secured_client = context.wrap_socket(client_socket)
+    for interface in interfaces:
+        if interface.startswith("lo"):
+            continue
+        addrs = netifaces.ifaddresses(interface)
+        if netifaces.AF_INET in addrs:
+            ip_address = addrs[netifaces.AF_INET][0]['addr']
+            break
 
-    # bind ip and port
-    secured_client.connect((ip_address, PORT))
+    port = 20004
 
-    # get certificate from the server
-    server_certificate = secured_client.getpeercert()
+    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    listening_socket.bind((ip_address, port))
+
+    start_time = time.time()
+    time_reset = 10
+
     
-    print("BREAK")
 
+    while not end_flag.is_set(): 
+        
+        elapsed_time = time.time() - start_time
 
+        #print(elapsed_time)
 
-def receive_file():
+        if elapsed_time >= time_reset:
+            with online_user_lock:
+                online_user_emails.clear()
+            start_time = time.time()
+            elapsed_time = 0
+        
 
-    #automatically get host and port
-    HOST = socket.gethostbyname(socket.gethostname())
-    PORT = 9000
-    print (HOST)
-    # creating a server socket
-    server_socket = socket.socket()
-    server_socket.bind((HOST, PORT))
+        try:
+            listening_socket.settimeout(1.0)
+            data, address = listening_socket.recvfrom(1024)  
+            # print("Received data from {}: {}".format(address, data.decode('utf-8')))
+            
+            user_email = data.decode('utf-8')
+            
+            online_user_emails.append(user_email)
+            online_user_emails = list(set(online_user_emails))
 
-    print(server_socket)
+            for item in online_user_emails:
+                print(item)
+            print("End of try loop")
 
-    # listen for new connections
-    server_socket.listen()
-    print("Server listening:")
+        except socket.timeout:
+            pass
+        
 
-    while True:
-        # accept connections
-        client_connection, client_address = server_socket.accept()
-        # wrap client socket
-        secured_client_socket = ssl.wrap_socket(client_connection, server_side=True, ca_certs= "ca.crt", certfile="user.crt", keyfile="user.key", cert_reqs=ssl.CERT_REQUIRED, ssl_version=ssl.PROTOCOL_TLSv1_2)
-
-        #  get the client's certificate
-        client_cert = secured_client_socket.getpeercert()
-        print(client_cert)
-        if not client_cert:
-                print("Unable to get the peer's certificate")
-
+    print("Closing Listening Socket")
+    listening_socket.close()
 
 def broadcast(end_flag):
 
@@ -102,9 +106,35 @@ def broadcast(end_flag):
     broadcast_socket.close()
     fp.close()
 
+# ----------------------------------------------------------------------------------------
 
-def listen(end_flag, online_user_emails):
+# takes data and ip address to send to the other socket
+def send_file(ip_address, file):
 
+    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    context.load_cert_chain("cert.pem")
+
+    with socket.create_connection((ip_address, 21000)) as sock:
+        with context.wrap_socket(sock, server_hostname = ip_address) as ssock:
+            ssock.sendall(file.encode())
+
+            with open(file, "rb") as f:
+                while True:
+                    data = f.read(1024)
+                    if not data:
+                        break
+                    ssock.sendall(data)
+
+    response = ssock.recv(1024).decode()
+    if response == "Received":
+        print("File has been received!")
+    else:
+        print("Unable to send file!")
+
+    ssock.close()
+#------------------------------
+
+def receive_file(end_flag):
     interfaces = netifaces.interfaces()
 
     for interface in interfaces:
@@ -114,47 +144,52 @@ def listen(end_flag, online_user_emails):
         if netifaces.AF_INET in addrs:
             ip_address = addrs[netifaces.AF_INET][0]['addr']
             break
+    
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain("cert.pem")
 
-    port = 20004
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind((ip_address, 21000))
 
-    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        while not end_flag.is_set():
+            try:
+                sock.settimeout(5)
+                sock.listen()
+                conn, addr = sock.accept()
+            except socket.timeout:
+                pass
 
-    listening_socket.bind((ip_address, port))
+            with context.wrap_socket(conn, server_side=True) as ssock:
+                filename = ssock.recv(1024).decode()
 
-    start_time = time.time()
-    time_reset = 60
+                response = input(f"Do you want to receive {filename} from {ip_address}? [y/n] ")
+                if response.lower() == "n":
+                    ssock.sendall("REJECTED".encode())
+                    continue
 
-    while not end_flag.is_set(): 
-        
-        elapsed_time = time.time() - start_time
+                ssock.sendall("Received".encode())
 
-        print(elapsed_time)
+                with open(filename, "wb") as f:
+                    while True:
+                        try:
+                            data = ssock.recv(1024)
+                        except socket.timeout:
+                            print("Connection timed out")
+                            break
 
-        if elapsed_time >= time_reset:
-            start_time = time.time()
-            elapsed_time = 0
-            online_user_emails = []
+                        if not data:
+                            break
+                        f.write(data)
 
+                print("File received successfully")
+                ssock.close()
 
-        try:
-            listening_socket.settimeout(1.0)
-            data, address = listening_socket.recvfrom(1024)  
-            # print("Received data from {}: {}".format(address, data.decode('utf-8')))
+    print("Closing SSL receiving socket!")
+                
             
-            user_email = data.decode('utf-8')
-            
-            online_user_emails.append(user_email)
-            online_user_emails = list(set(online_user_emails))
 
-            for item in online_user_emails:
-                print(item)
-
-
-        except socket.timeout:
-            pass
         
-
-    print("Closing Listening Socket")
-    listening_socket.close()
+        
+    
 
 

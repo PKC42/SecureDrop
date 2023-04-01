@@ -8,6 +8,8 @@ import os
 import time
 import datetime
 
+online_user_emails = []
+
 # Check if there is a lowercase letter in the string
 def check_lower(st):
     for c in st:
@@ -73,6 +75,13 @@ def compare_timestamp(contact_file, time_file):
 
 def contact_file_scan():
     file = Path('contacts.json')
+    if file.is_file():
+        return True
+    else:
+        return False
+    
+def cert_scan():
+    file = Path('cert.pem')
     if file.is_file():
         return True
     else:
