@@ -13,7 +13,7 @@ import threading
 
 
 online_user_lock = threading.Lock()
-
+# ----------------------------------------------------------------------------------------
 def listen(end_flag):
 
     global online_user_emails
@@ -70,9 +70,9 @@ def listen(end_flag):
             pass
         
 
-    print("Closing Listening Socket")
+    print("Closing Listening socket")
     listening_socket.close()
-
+# ----------------------------------------------------------------------------------------
 def broadcast(end_flag):
 
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -114,25 +114,20 @@ def send_file(ip_address, file):
     context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
     context.load_cert_chain("cert.pem")
 
-    with socket.create_connection((ip_address, 21000)) as sock:
-        with context.wrap_socket(sock, server_hostname = ip_address) as ssock:
-            ssock.sendall(file.encode())
+    try:
+        with socket.create_connection((ip_address, 21000)) as sock:
+                with context.wrap_socket(sock, server_hostname = ip_address) as ssock:
+                    ssock.sendall(file.encode())
 
-            with open(file, "rb") as f:
-                while True:
-                    data = f.read(1024)
-                    if not data:
-                        break
-                    ssock.sendall(data)
-
-    response = ssock.recv(1024).decode()
-    if response == "Received":
-        print("File has been received!")
-    else:
-        print("Unable to send file!")
-
-    ssock.close()
-#------------------------------
+                    with open(file, "rb") as f:
+                        while True:
+                            data = f.read(1024)
+                            if not data:
+                                break
+                            ssock.sendall(data)
+    except ConnectionRefusedError:
+        print("Connection refused! The receiver may be offline or unreachable.")
+# ----------------------------------------------------------------------------------------
 
 def receive_file(end_flag):
     interfaces = netifaces.interfaces()
@@ -148,43 +143,34 @@ def receive_file(end_flag):
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.load_cert_chain("cert.pem")
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind((ip_address, 21000))
+    while not end_flag.is_set():
 
-        while not end_flag.is_set():
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
-                sock.settimeout(5)
+                sock.settimeout(10.0)
+                sock.bind((ip_address, 21000))
                 sock.listen()
-                conn, addr = sock.accept()
+                connection, address = sock.accept()
+
+                with context.wrap_socket(connection, server_side = True) as ssock:
+                    filename = ssock.recv(1024).decode()
+
+                    with open(filename, "wb") as f:
+                        while True:
+                            data = ssock.recv(1024)
+                            if not data:
+                                break
+                            f.write(data)
+
+                            
+
             except socket.timeout:
+                # print("Connection timed out!")
                 pass
 
-            with context.wrap_socket(conn, server_side=True) as ssock:
-                filename = ssock.recv(1024).decode()
+    print("Closing receive file socket")
+        
 
-                response = input(f"Do you want to receive {filename} from {ip_address}? [y/n] ")
-                if response.lower() == "n":
-                    ssock.sendall("REJECTED".encode())
-                    continue
-
-                ssock.sendall("Received".encode())
-
-                with open(filename, "wb") as f:
-                    while True:
-                        try:
-                            data = ssock.recv(1024)
-                        except socket.timeout:
-                            print("Connection timed out")
-                            break
-
-                        if not data:
-                            break
-                        f.write(data)
-
-                print("File received successfully")
-                ssock.close()
-
-    print("Closing SSL receiving socket!")
                 
             
 

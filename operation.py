@@ -187,7 +187,7 @@ def send():
     ip_address = data[contact]["IP"]
 
     print("This is the ip of your contact:", ip_address)
-    # send_file(ip_address , file_name)
+    send_file(ip_address , file_name)
 
 
     
