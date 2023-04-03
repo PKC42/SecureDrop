@@ -113,7 +113,7 @@ def send_file(ip_address, file):
     context.verify_mode = ssl.CERT_NONE
 
     try:
-        with socket.create_connection((ip_address, 21000)) as sock:
+        with socket.create_connection((ip_address, 21001)) as sock:
                 with context.wrap_socket(sock, server_hostname = ip_address) as ssock:
                     ssock.sendall(file.encode())
 
@@ -149,7 +149,7 @@ def receive_file(end_flag):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
                 sock.settimeout(10.0)
-                sock.bind((ip_address, 21000))
+                sock.bind((ip_address, 21001))
                 sock.listen()
                 connection, address = sock.accept()
 
