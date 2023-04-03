@@ -55,16 +55,12 @@ def listen(end_flag):
         try:
             listening_socket.settimeout(1.0)
             data, address = listening_socket.recvfrom(1024)  
-            # print("Received data from {}: {}".format(address, data.decode('utf-8')))
             
             user_email = data.decode('utf-8')
             
             online_user_emails.append(user_email)
             online_user_emails = list(set(online_user_emails))
 
-            for item in online_user_emails:
-                print(item)
-            print("End of try loop")
 
         except socket.timeout:
             pass
@@ -113,6 +109,8 @@ def send_file(ip_address, file):
 
     context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
     context.load_cert_chain("cert.pem")
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
 
     try:
         with socket.create_connection((ip_address, 21000)) as sock:
@@ -142,6 +140,9 @@ def receive_file(end_flag):
     
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.load_cert_chain("cert.pem")
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
 
     while not end_flag.is_set():
 
