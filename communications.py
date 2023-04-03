@@ -166,6 +166,7 @@ def receive_file(end_flag):
                             
 
             except socket.timeout:
+                sock.close()
                 # print("Connection timed out!")
                 pass
 
