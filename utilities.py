@@ -7,6 +7,9 @@ from pathlib import Path
 import os
 import time
 import datetime
+import json
+
+online_user_emails = []
 
 # Check if there is a lowercase letter in the string
 def check_lower(st):
@@ -51,6 +54,7 @@ def user_file_scan():
     else:
         return False
 
+# Return file time stmap
 def get_timestamp(file_name):
     timestamp = os.path.getmtime(file_name)
     datestamp = datetime.datetime.fromtimestamp(timestamp)
@@ -58,6 +62,7 @@ def get_timestamp(file_name):
     
     return datestamp
 
+# Compare time stamps
 def compare_timestamp(contact_file, time_file):
     contact_stamp = get_timestamp(contact_file)
     time_stamp = get_timestamp(time_file)
@@ -67,3 +72,32 @@ def compare_timestamp(contact_file, time_file):
     
     return True
 
+
+
+def contact_file_scan():
+    file = Path('contacts.json')
+    if file.is_file():
+        return True
+    else:
+        return False
+    
+def cert_scan():
+    file = Path('cert.pem')
+    if file.is_file():
+        return True
+    else:
+        return False
+    
+def is_contact(address):
+
+    file = Path('contacts.json')
+    if file.is_file():
+        fp = open('contacts.json', "r")
+        data = json.load(fp)
+        fp.close()
+
+    for item in data:
+        if data[item]["IP"] == address:
+            return True
+        
+    return False 

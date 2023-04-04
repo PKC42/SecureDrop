@@ -1,10 +1,22 @@
 from registration import register_new_user
 from login import login
 from utilities import user_file_scan
+from utilities import *
 from operation import operation
+from threading import Thread
+from communications import *
+import threading
+import subprocess
 
 def run():
-    
+
+    if cert_scan() == False:
+        openssl_cmd = "openssl req -new -x509 -days 365 -nodes -out cert.pem -keyout cert.pem"
+        subprocess.run(openssl_cmd, shell=True, check=True)
+
+    # flag for ending threads
+    end_flag = threading.Event()
+
     # If user file does not exist, register to create a user
     if user_file_scan() == False:
         print("No users are registered with this client.")
@@ -34,6 +46,20 @@ def run():
             print("Exiting Secure Drop.")
             return
         else:
+            # pass a list which will be updates in thread 2
+            online_user_emails = []
+
+            # start broadcasting that the client is now online
+            if contact_file_scan() == True:
+                t1 = Thread(target = broadcast, args = (end_flag, ))
+                t1.start() 
+
+            t2 = Thread(target = listen, args = (end_flag, ))
+            t2.start()
+
+            t3 = Thread(target = receive_file, args = (end_flag, ))
+            t3.start()
+
             print("Welcome to Secure Drop.")
             # functions for list commands go here
             while True:
@@ -50,6 +76,12 @@ def run():
                     break
             
     print("Exiting Secure Drop.")
+    end_flag.set()
+
+    t1.join()
+    t2.join()
+    t3.join()
+
     return
     
 if __name__ == "__main__":

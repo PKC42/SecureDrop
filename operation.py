@@ -1,5 +1,6 @@
 import re
 from utilities import check_lower, check_upper, check_number, check_symbol, get_timestamp, hash_string
+from utilities import online_user_emails
 import json
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
@@ -75,7 +76,9 @@ def add_contact():
 
     hashed_contact_email = hash_string(contact_email, salt)
 
-    del contact_email
+    # del contact_email
+
+    status = "Offline"
       
     print("Enter IP address of the contact (IPV4): ")
     while True:
@@ -84,8 +87,6 @@ def add_contact():
             break
         else:
             print("Enter an IPV4 ip address in the correct format.")
-
-
   
     file = Path('contacts.json')
     if file.is_file():
@@ -96,10 +97,12 @@ def add_contact():
         os.chmod('contacts.json', 0o600)
         data = json.load(fp)
         fp.close()
+
         data[contact_name] = {
-            "Email" : hashed_contact_email,
+            "Email" : contact_email,
             "Salt": salt,
-            "IP": ip_address
+            "IP": ip_address,
+            "Status": status
         }
         
         fp = open('contacts.json', 'w')
@@ -119,9 +122,10 @@ def add_contact():
         os.chmod('contacts.json', 0o600)
         contact_data = {
             contact_name: {
-                "Email" : hashed_contact_email,
+                "Email" : contact_email,
                 "Salt": salt,
-                "IP" : ip_address
+                "IP" : ip_address,
+                "Status" : status
                 }
         }
         json.dump(contact_data, fp)
@@ -131,32 +135,44 @@ def add_contact():
         
         print("Contact Added")
 
-    
-    
 
 def list():
 
     file = Path('contacts.json')
     if file.is_file():
-        fp = open('contacts.json', "r")
-        data = json.load(fp)
-        print("\nContacts: ")
-        for contacts in data:
-            print(contacts)
+        pass
     else:
         print("No Contacts!")
-    
+
+    print("Online Contacts: ")
+    for item in online_user_emails:
+        print(item)
+
+
     print("\n")
     
 
 
 def send():
 
-    print("Who do you want to send the file to?")
-    contact = input()
-    file = Path('contacts.json')
-    # Error Check 
-    
+    status = False
+
+    while status == False:
+        print("Who do you want to send the file to?")
+        contact = input()
+        file = Path('contacts.json')
+
+        if file.is_file():
+            fp = open('contacts.json', "r")
+            data = json.load(fp)
+            for contacts in data:
+                if contact == contacts:
+                    status = True
+            if status == False:
+                print(contact, " is not in your contacts list! Please enter a valid contact!")
+        else:
+            print("No Contacts! Returning to main menu.")
+            return
 
     print("Enter the file that you want to send (include path if it is not in the program folder)")
     file_name = input()
@@ -166,10 +182,11 @@ def send():
         file_name = input()
         file = Path(file_name)
     
-    print(f"{file_name} is a valid file!")
-    data = open(file_name, "rb")
+    # print(f"{file_name} is a valid file!")
 
-    send_file("172.17.0.2", data)
+    ip_address = data[contact]["IP"]
+
+    send_file(ip_address , file_name)
 
 
     
