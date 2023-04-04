@@ -182,11 +182,10 @@ def send():
         file_name = input()
         file = Path(file_name)
     
-    print(f"{file_name} is a valid file!")
+    # print(f"{file_name} is a valid file!")
 
     ip_address = data[contact]["IP"]
 
-    print("This is the ip of your contact:", ip_address)
     send_file(ip_address , file_name)
 
 

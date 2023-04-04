@@ -9,6 +9,7 @@ import netifaces
 import time
 from utilities import online_user_emails
 import threading
+from utilities import is_contact
 
 
 
@@ -153,6 +154,8 @@ def receive_file(end_flag):
                 sock.listen()
                 connection, address = sock.accept()
 
+                
+
                 with context.wrap_socket(connection, server_side = True) as ssock:
                     filename = ssock.recv(1024).decode()
 
@@ -163,8 +166,9 @@ def receive_file(end_flag):
                                 break
                             f.write(data)
 
-                            
-
+                    ssock.close()
+                    sock.close()
+               
             except socket.timeout:
                 sock.close()
                 # print("Connection timed out!")

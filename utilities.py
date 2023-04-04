@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 import time
 import datetime
+import json
 
 online_user_emails = []
 
@@ -86,3 +87,17 @@ def cert_scan():
         return True
     else:
         return False
+    
+def is_contact(address):
+
+    file = Path('contacts.json')
+    if file.is_file():
+        fp = open('contacts.json', "r")
+        data = json.load(fp)
+        fp.close()
+
+    for item in data:
+        if data[item]["IP"] == address:
+            return True
+        
+    return False 
